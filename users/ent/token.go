@@ -26,6 +26,8 @@ type Token struct {
 	Token string `json:"token,omitempty"`
 	// Type holds the value of the "type" field.
 	Type token.Type `json:"type,omitempty"`
+	// ExpiresAt holds the value of the "expires_at" field.
+	ExpiresAt time.Time `json:"expires_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TokenQuery when eager-loading is set.
 	Edges        TokenEdges `json:"edges"`
@@ -60,7 +62,7 @@ func (*Token) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case token.FieldID, token.FieldToken, token.FieldType:
 			values[i] = new(sql.NullString)
-		case token.FieldCreatedAt, token.FieldUpdatedAt:
+		case token.FieldCreatedAt, token.FieldUpdatedAt, token.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
 		case token.ForeignKeys[0]: // user_tokens
 			values[i] = new(sql.NullString)
@@ -108,6 +110,12 @@ func (t *Token) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
 				t.Type = token.Type(value.String)
+			}
+		case token.FieldExpiresAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field expires_at", values[i])
+			} else if value.Valid {
+				t.ExpiresAt = value.Time
 			}
 		case token.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -168,6 +176,9 @@ func (t *Token) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(fmt.Sprintf("%v", t.Type))
+	builder.WriteString(", ")
+	builder.WriteString("expires_at=")
+	builder.WriteString(t.ExpiresAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

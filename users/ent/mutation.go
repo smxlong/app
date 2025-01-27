@@ -1688,6 +1688,7 @@ type TokenMutation struct {
 	updated_at    *time.Time
 	token         *string
 	_type         *token.Type
+	expires_at    *time.Time
 	clearedFields map[string]struct{}
 	user          *string
 	cleareduser   bool
@@ -1944,6 +1945,42 @@ func (m *TokenMutation) ResetType() {
 	m._type = nil
 }
 
+// SetExpiresAt sets the "expires_at" field.
+func (m *TokenMutation) SetExpiresAt(t time.Time) {
+	m.expires_at = &t
+}
+
+// ExpiresAt returns the value of the "expires_at" field in the mutation.
+func (m *TokenMutation) ExpiresAt() (r time.Time, exists bool) {
+	v := m.expires_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExpiresAt returns the old "expires_at" field's value of the Token entity.
+// If the Token object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TokenMutation) OldExpiresAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExpiresAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExpiresAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExpiresAt: %w", err)
+	}
+	return oldValue.ExpiresAt, nil
+}
+
+// ResetExpiresAt resets all changes to the "expires_at" field.
+func (m *TokenMutation) ResetExpiresAt() {
+	m.expires_at = nil
+}
+
 // SetUserID sets the "user" edge to the User entity by id.
 func (m *TokenMutation) SetUserID(id string) {
 	m.user = &id
@@ -2017,7 +2054,7 @@ func (m *TokenMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TokenMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.created_at != nil {
 		fields = append(fields, token.FieldCreatedAt)
 	}
@@ -2029,6 +2066,9 @@ func (m *TokenMutation) Fields() []string {
 	}
 	if m._type != nil {
 		fields = append(fields, token.FieldType)
+	}
+	if m.expires_at != nil {
+		fields = append(fields, token.FieldExpiresAt)
 	}
 	return fields
 }
@@ -2046,6 +2086,8 @@ func (m *TokenMutation) Field(name string) (ent.Value, bool) {
 		return m.Token()
 	case token.FieldType:
 		return m.GetType()
+	case token.FieldExpiresAt:
+		return m.ExpiresAt()
 	}
 	return nil, false
 }
@@ -2063,6 +2105,8 @@ func (m *TokenMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldToken(ctx)
 	case token.FieldType:
 		return m.OldType(ctx)
+	case token.FieldExpiresAt:
+		return m.OldExpiresAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Token field %s", name)
 }
@@ -2099,6 +2143,13 @@ func (m *TokenMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetType(v)
+		return nil
+	case token.FieldExpiresAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExpiresAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Token field %s", name)
@@ -2160,6 +2211,9 @@ func (m *TokenMutation) ResetField(name string) error {
 		return nil
 	case token.FieldType:
 		m.ResetType()
+		return nil
+	case token.FieldExpiresAt:
+		m.ResetExpiresAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Token field %s", name)

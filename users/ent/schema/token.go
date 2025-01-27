@@ -20,6 +20,7 @@ func (Token) Fields() []ent.Field {
 		field.Enum("type").
 			Values("reset_password").
 			Default("reset_password"),
+		field.Time("expires_at"),
 	}
 }
 

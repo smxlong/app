@@ -75,13 +75,13 @@ func (t *Issuer) Middleware() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 			return
 		}
-		c.Set("jwt", auth[7:])
-		c.Set("claims", token)
 		sub, _ := token.Subject()
 		if sub == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing subject in token"})
 			return
 		}
+		c.Set("jwt", auth[7:])
+		c.Set("claims", token)
 		c.Set("subject", sub)
 		c.Next()
 	}

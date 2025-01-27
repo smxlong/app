@@ -23,6 +23,8 @@ const (
 	FieldToken = "token"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
+	// FieldExpiresAt holds the string denoting the expires_at field in the database.
+	FieldExpiresAt = "expires_at"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the token in the database.
@@ -43,6 +45,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldToken,
 	FieldType,
+	FieldExpiresAt,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "tokens"
@@ -132,6 +135,11 @@ func ByToken(opts ...sql.OrderTermOption) OrderOption {
 // ByType orders the results by the type field.
 func ByType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldType, opts...).ToFunc()
+}
+
+// ByExpiresAt orders the results by the expires_at field.
+func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExpiresAt, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.

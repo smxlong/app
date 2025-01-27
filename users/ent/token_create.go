@@ -69,6 +69,12 @@ func (tc *TokenCreate) SetNillableType(t *token.Type) *TokenCreate {
 	return tc
 }
 
+// SetExpiresAt sets the "expires_at" field.
+func (tc *TokenCreate) SetExpiresAt(t time.Time) *TokenCreate {
+	tc.mutation.SetExpiresAt(t)
+	return tc
+}
+
 // SetID sets the "id" field.
 func (tc *TokenCreate) SetID(s string) *TokenCreate {
 	tc.mutation.SetID(s)
@@ -179,6 +185,9 @@ func (tc *TokenCreate) check() error {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Token.type": %w`, err)}
 		}
 	}
+	if _, ok := tc.mutation.ExpiresAt(); !ok {
+		return &ValidationError{Name: "expires_at", err: errors.New(`ent: missing required field "Token.expires_at"`)}
+	}
 	if v, ok := tc.mutation.ID(); ok {
 		if err := token.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Token.id": %w`, err)}
@@ -234,6 +243,10 @@ func (tc *TokenCreate) createSpec() (*Token, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.GetType(); ok {
 		_spec.SetField(token.FieldType, field.TypeEnum, value)
 		_node.Type = value
+	}
+	if value, ok := tc.mutation.ExpiresAt(); ok {
+		_spec.SetField(token.FieldExpiresAt, field.TypeTime, value)
+		_node.ExpiresAt = value
 	}
 	if nodes := tc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

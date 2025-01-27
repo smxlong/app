@@ -55,6 +55,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "token", Type: field.TypeString, Unique: true},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"reset_password"}, Default: "reset_password"},
+		{Name: "expires_at", Type: field.TypeTime},
 		{Name: "user_tokens", Type: field.TypeString, Nullable: true, Size: 36},
 	}
 	// TokensTable holds the schema information for the "tokens" table.
@@ -65,7 +66,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "tokens_users_tokens",
-				Columns:    []*schema.Column{TokensColumns[5]},
+				Columns:    []*schema.Column{TokensColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

@@ -63,6 +63,20 @@ func (tu *TokenUpdate) SetNillableType(t *token.Type) *TokenUpdate {
 	return tu
 }
 
+// SetExpiresAt sets the "expires_at" field.
+func (tu *TokenUpdate) SetExpiresAt(t time.Time) *TokenUpdate {
+	tu.mutation.SetExpiresAt(t)
+	return tu
+}
+
+// SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
+func (tu *TokenUpdate) SetNillableExpiresAt(t *time.Time) *TokenUpdate {
+	if t != nil {
+		tu.SetExpiresAt(*t)
+	}
+	return tu
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (tu *TokenUpdate) SetUserID(id string) *TokenUpdate {
 	tu.mutation.SetUserID(id)
@@ -165,6 +179,9 @@ func (tu *TokenUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tu.mutation.GetType(); ok {
 		_spec.SetField(token.FieldType, field.TypeEnum, value)
 	}
+	if value, ok := tu.mutation.ExpiresAt(); ok {
+		_spec.SetField(token.FieldExpiresAt, field.TypeTime, value)
+	}
 	if tu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -244,6 +261,20 @@ func (tuo *TokenUpdateOne) SetType(t token.Type) *TokenUpdateOne {
 func (tuo *TokenUpdateOne) SetNillableType(t *token.Type) *TokenUpdateOne {
 	if t != nil {
 		tuo.SetType(*t)
+	}
+	return tuo
+}
+
+// SetExpiresAt sets the "expires_at" field.
+func (tuo *TokenUpdateOne) SetExpiresAt(t time.Time) *TokenUpdateOne {
+	tuo.mutation.SetExpiresAt(t)
+	return tuo
+}
+
+// SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
+func (tuo *TokenUpdateOne) SetNillableExpiresAt(t *time.Time) *TokenUpdateOne {
+	if t != nil {
+		tuo.SetExpiresAt(*t)
 	}
 	return tuo
 }
@@ -379,6 +410,9 @@ func (tuo *TokenUpdateOne) sqlSave(ctx context.Context) (_node *Token, err error
 	}
 	if value, ok := tuo.mutation.GetType(); ok {
 		_spec.SetField(token.FieldType, field.TypeEnum, value)
+	}
+	if value, ok := tuo.mutation.ExpiresAt(); ok {
+		_spec.SetField(token.FieldExpiresAt, field.TypeTime, value)
 	}
 	if tuo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
