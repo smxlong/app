@@ -15,7 +15,7 @@ import (
 // Run the application
 func (a *Application) Run() error {
 	a.debugFlag, _ = strconv.ParseBool(os.Getenv("DEBUG"))
-	setupFuncs := a.setupFunctions()
+	setupFuncs := a.resourcesSetupFunctions()
 	setupFuncs = append(setupFuncs, a.SetupFuncs...)
 	r := &Resources{}
 	for _, f := range setupFuncs {

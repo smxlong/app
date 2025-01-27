@@ -43,7 +43,11 @@ func (u *Users) Close() error {
 
 // Find returns the user with the given ID.
 func (u *Users) Find(ctx context.Context, id string) (*User, error) {
-	return u.cli.User.Get(ctx, id)
+	user, err := u.cli.User.Get(ctx, id)
+	if ent.IsNotFound(err) {
+		return nil, api.ErrNotFound
+	}
+	return user, err
 }
 
 // FindByEmail returns the user with the given email.
@@ -51,7 +55,7 @@ func (u *Users) FindByEmail(ctx context.Context, email string) (*User, error) {
 	user, err := u.cli.User.Query().
 		Where(user.Email(email)).Only(ctx)
 	if ent.IsNotFound(err) {
-		return nil, api.ErrUnauthorized
+		return nil, api.ErrNotFound
 	}
 	return user, err
 }
@@ -61,7 +65,7 @@ func (u *Users) FindByName(ctx context.Context, name string) (*User, error) {
 	user, err := u.cli.User.Query().
 		Where(user.Name(name)).Only(ctx)
 	if ent.IsNotFound(err) {
-		return nil, api.ErrUnauthorized
+		return nil, api.ErrNotFound
 	}
 	return user, err
 }
@@ -98,7 +102,7 @@ func (u *Users) Login(ctx context.Context, user *User, password string) (*User, 
 func (u *Users) LoginByEmail(ctx context.Context, email, password string) (*User, error) {
 	user, err := u.FindByEmail(ctx, email)
 	if err != nil {
-		if ent.IsNotFound(err) {
+		if errors.Is(err, api.ErrNotFound) {
 			return nil, api.ErrUnauthorized
 		}
 		return nil, err
@@ -110,7 +114,7 @@ func (u *Users) LoginByEmail(ctx context.Context, email, password string) (*User
 func (u *Users) LoginByName(ctx context.Context, name, password string) (*User, error) {
 	user, err := u.FindByName(ctx, name)
 	if err != nil {
-		if ent.IsNotFound(err) {
+		if errors.Is(err, api.ErrNotFound) {
 			return nil, api.ErrUnauthorized
 		}
 		return nil, err
@@ -140,7 +144,7 @@ func (u *Users) RegisterResetPasswordToken(ctx context.Context, user *User, jwts
 	// Parse the token and get the password_reset_before claim so we can set the token's expiration time field.
 	parsed, err := jwt.Parse([]byte(jwtstr), jwt.WithValidate(false), jwt.WithVerify(false))
 	if err != nil {
-		return err
+		return api.ErrInternalServerError.WithMessage("could not parse reset password token")
 	}
 	var passwordResetBefore string
 	if err := parsed.Get("password_reset_before", &passwordResetBefore); err != nil {
@@ -149,6 +153,9 @@ func (u *Users) RegisterResetPasswordToken(ctx context.Context, user *User, jwts
 	passwordResetBeforeTime, err := time.Parse(time.RFC3339, passwordResetBefore)
 	if err != nil {
 		return api.ErrInternalServerError.WithMessage("could not parse password_reset_before claim")
+	}
+	if time.Now().After(passwordResetBeforeTime) {
+		return api.ErrBadRequest.WithMessage("reset password token expired")
 	}
 	return u.cli.Token.Create().
 		SetUser(user).

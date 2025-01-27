@@ -17,7 +17,6 @@ func (a *Application) setupGin(r *Resources) (CleanupFunc, error) {
 	a.setupGinRequestLogging(r)
 	r.Gin.Use(gin.Recovery())
 	return nil, nil
-
 }
 
 // setupGinRequestLogging sets up request logging for the Gin engine.

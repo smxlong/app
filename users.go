@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/lestrrat-go/jwx/v3/jwt"
 	_ "github.com/mattn/go-sqlite3"
 
+	"github.com/smxlong/app/api"
 	users_api "github.com/smxlong/app/api/users"
 	"github.com/smxlong/app/token"
 	"github.com/smxlong/app/users"
@@ -82,6 +84,9 @@ func (a *Application) setupUsersAPI(r *Resources) (CleanupFunc, error) {
 			var err error
 			if user, err = r.Users.FindByEmail(ctx, request.NameOrEmail); err != nil {
 				if user, err = r.Users.FindByName(ctx, request.NameOrEmail); err != nil {
+					if errors.Is(err, api.ErrNotFound) {
+						return nil, api.ErrUnauthorized
+					}
 					return nil, err
 				}
 			}
