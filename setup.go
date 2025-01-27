@@ -10,6 +10,9 @@ type CleanupFunc func() error
 func (a *Application) setupFunctions() []SetupFunc {
 	return []SetupFunc{
 		a.setupLogger,
+		a.setupUsers,
+		a.setupUserTokenIssuer,
 		a.setupGin,
+		a.setupUsersAPI,
 	}
 }

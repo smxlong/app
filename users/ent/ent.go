@@ -15,6 +15,7 @@ import (
 	"github.com/smxlong/app/users/ent/base"
 	"github.com/smxlong/app/users/ent/permission"
 	"github.com/smxlong/app/users/ent/role"
+	"github.com/smxlong/app/users/ent/token"
 	"github.com/smxlong/app/users/ent/user"
 )
 
@@ -79,6 +80,7 @@ func checkColumn(table, column string) error {
 			base.Table:       base.ValidColumn,
 			permission.Table: permission.ValidColumn,
 			role.Table:       role.ValidColumn,
+			token.Table:      token.ValidColumn,
 			user.Table:       user.ValidColumn,
 		})
 	})

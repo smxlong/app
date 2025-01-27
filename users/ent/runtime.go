@@ -9,6 +9,7 @@ import (
 	"github.com/smxlong/app/users/ent/permission"
 	"github.com/smxlong/app/users/ent/role"
 	"github.com/smxlong/app/users/ent/schema"
+	"github.com/smxlong/app/users/ent/token"
 	"github.com/smxlong/app/users/ent/user"
 )
 
@@ -121,6 +122,45 @@ func init() {
 	// role.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	role.IDValidator = func() func(string) error {
 		validators := roleDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	tokenMixin := schema.Token{}.Mixin()
+	tokenMixinFields0 := tokenMixin[0].Fields()
+	_ = tokenMixinFields0
+	tokenFields := schema.Token{}.Fields()
+	_ = tokenFields
+	// tokenDescCreatedAt is the schema descriptor for created_at field.
+	tokenDescCreatedAt := tokenMixinFields0[1].Descriptor()
+	// token.DefaultCreatedAt holds the default value on creation for the created_at field.
+	token.DefaultCreatedAt = tokenDescCreatedAt.Default.(func() time.Time)
+	// tokenDescUpdatedAt is the schema descriptor for updated_at field.
+	tokenDescUpdatedAt := tokenMixinFields0[2].Descriptor()
+	// token.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	token.DefaultUpdatedAt = tokenDescUpdatedAt.Default.(func() time.Time)
+	// token.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	token.UpdateDefaultUpdatedAt = tokenDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// tokenDescToken is the schema descriptor for token field.
+	tokenDescToken := tokenFields[0].Descriptor()
+	// token.TokenValidator is a validator for the "token" field. It is called by the builders before save.
+	token.TokenValidator = tokenDescToken.Validators[0].(func(string) error)
+	// tokenDescID is the schema descriptor for id field.
+	tokenDescID := tokenMixinFields0[0].Descriptor()
+	// token.DefaultID holds the default value on creation for the id field.
+	token.DefaultID = tokenDescID.Default.(func() string)
+	// token.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	token.IDValidator = func() func(string) error {
+		validators := tokenDescID.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),

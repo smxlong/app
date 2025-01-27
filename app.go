@@ -2,6 +2,8 @@ package app
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/smxlong/app/token"
+	"github.com/smxlong/app/users"
 	"github.com/smxlong/kit/logger"
 )
 
@@ -19,6 +21,8 @@ type Application struct {
 type Resources struct {
 	Logger logger.Logger
 	Gin    *gin.Engine
+	Users  *users.Users
+	Issuer *token.Issuer
 }
 
 // DebugMode returns true if the application is in debug mode.
